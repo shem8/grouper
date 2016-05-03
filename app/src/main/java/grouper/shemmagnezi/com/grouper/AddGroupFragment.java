@@ -27,8 +27,7 @@ public class AddGroupFragment extends Fragment {
     private AddGroupFragmentListener listener;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_add_group, container, false);
     }
 
@@ -57,20 +56,23 @@ public class AddGroupFragment extends Fragment {
             @Override
             public boolean onPreDraw() {
                 view.getViewTreeObserver().removeOnPreDrawListener(this);
-                View window = view.findViewById(R.id.add_group_window);
-                window.setTranslationY(window.getHeight());
-                AnimatorSet set = new AnimatorSet();
-                ObjectAnimator anim1 = ObjectAnimator.ofFloat(view, "alpha", 0, 1);
-                anim1.setDuration(400);
-                ObjectAnimator anim2 = ObjectAnimator.ofFloat(window, "translationY", window.getHeight(), 0);
-                anim2.setDuration(200);
-                set.playSequentially(anim1, anim2);
-                set.start();
-
+                animateViewAppear(view);
                 return false;
             }
         });
 
+    }
+
+    private void animateViewAppear(View view) {
+        View window = view.findViewById(R.id.add_group_window);
+        window.setTranslationY(window.getHeight());
+        AnimatorSet set = new AnimatorSet();
+        ObjectAnimator anim1 = ObjectAnimator.ofFloat(view, "alpha", 0, 1);
+        anim1.setDuration(400);
+        ObjectAnimator anim2 = ObjectAnimator.ofFloat(window, "translationY", window.getHeight(), 0);
+        anim2.setDuration(200);
+        set.playSequentially(anim1, anim2);
+        set.start();
     }
 
     @Override

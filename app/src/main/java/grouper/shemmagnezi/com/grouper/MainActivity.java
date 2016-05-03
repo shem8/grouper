@@ -5,8 +5,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.client.Firebase;
@@ -18,6 +16,7 @@ public class MainActivity extends AppCompatActivity implements AddGroupFragment.
         GroupsListFragment.GroupsListFragmentListener {
 
     private Toolbar toolbar;
+    private IGrouperDao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +34,34 @@ public class MainActivity extends AppCompatActivity implements AddGroupFragment.
     }
 
     @Override
+    public void groupSelected(Group group, String name) {
+        if (name.length() == 0) {
+            errorDialog();
+            return;
+        }
+        Member member = new Member();
+        member.setName(name);
+
+        String id = dao.addMemberToGroup(group, member);
+
+        moveToGroupScreen(group, id);
+
+    }
+
+    @Override
+    public void addGroup(String name) {
+        if (name.length() == 0) {
+            errorDialog();
+            return;
+        }
+        Group group = new Group();
+        group.setName(name);
+        String id = dao.addGroup(group);
+
+        moveToGroupAdminScreen(id);
+    }
+
+    @Override
     public void openAddGroup() {
         FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
         tran.add(R.id.container, new AddGroupFragment());
@@ -42,78 +69,33 @@ public class MainActivity extends AppCompatActivity implements AddGroupFragment.
         tran.commit();
     }
 
-    @Override
-    public void groupSelected(Group group, String name) {
-        if (name.length() == 0) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Please choose a user name");
-            builder.setPositiveButton("OK", null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-            return;
-        }
-        Firebase myFirebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data");
-        Firebase members = myFirebaseRef.child("groups/" + group.getId() + "/members");
-        Firebase newMember = members.push();
-        Member member = new Member(newMember.getKey(), name);
-        newMember.setValue(member);
-
+    private void moveToGroupScreen(Group group, String memeber) {
         getSupportFragmentManager().popBackStack();
         FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
-        tran.add(R.id.container, GroupFragment.create(group.getId(), member.getId()));
+        tran.add(R.id.container, GroupFragment.create(group.getId(), memeber));
         tran.addToBackStack(null);
         tran.commit();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void cancel() {
         getSupportFragmentManager().popBackStack();
     }
+    private void errorDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Please choose a name =(");
+        builder.setPositiveButton("OK", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-    @Override
-    public void addGroup(String name) {
-        if (name.length() == 0) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Please choose a group name");
-            builder.setPositiveButton("OK", null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-            return;
-        }
-        Firebase myFirebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data");
-        Firebase groups = myFirebaseRef.child("groups");
-        Firebase newGroup = groups.push();
-        newGroup.setValue(new Group(newGroup.getKey(), name));
-
+    private void moveToGroupAdminScreen(String id) {
         getSupportFragmentManager().popBackStack();
         FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
-        tran.add(R.id.container, GroupAdminFragment.create(newGroup.getKey()));
+        tran.add(R.id.container, GroupAdminFragment.create(id));
         tran.addToBackStack(null);
         tran.commit();
 

@@ -24,6 +24,14 @@ public class Group {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public Map<String, Member> getMembers() {
         return members;
     }

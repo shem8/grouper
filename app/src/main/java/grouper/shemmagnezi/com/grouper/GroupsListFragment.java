@@ -12,11 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
@@ -31,6 +26,7 @@ public class GroupsListFragment extends Fragment {
 
     private GroupNameAdapter adapter;
     private TextView memberName;
+    private IGrouperDao dao;
 
     public interface GroupsListFragmentListener {
         void openAddGroup();
@@ -49,6 +45,42 @@ public class GroupsListFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        initView(view);
+
+        dao.setGroupsListListener(new IGrouperDao.ItemsListener<Group>() {
+            @Override
+            public void itemAdded(Group group) {
+                adapter.items.add(group);
+                adapter.notifyItemInserted(adapter.items.size() - 1);
+            }
+
+            @Override
+            public void itemChanged(Group item) {
+                int indexOf = adapter.items.indexOf(item);
+                if (indexOf >= 0) {
+                    adapter.items.remove(indexOf);
+                    adapter.items.add(indexOf, item);
+                    adapter.notifyItemChanged(indexOf);
+                } else {
+                    adapter.items.add(item);
+                    adapter.notifyItemInserted(adapter.items.size() - 1);
+                }
+            }
+
+            @Override
+            public void itemDeleted(Group item) {
+                int indexOf = adapter.items.indexOf(item);
+                if (indexOf >= 0) {
+                    adapter.items.remove(indexOf);
+                    adapter.notifyItemRemoved(indexOf);
+                }
+            }
+        });
+
+
+    }
+
+    private void initView(View view) {
         memberName = (TextView) view.findViewById(R.id.member_name);
         groupsList = (RecyclerView) view.findViewById(R.id.groups_list);
         adapter = new GroupNameAdapter();
@@ -61,8 +93,6 @@ public class GroupsListFragment extends Fragment {
             public void onClick(View view) {
                 fab.hide();
                 listener.openAddGroup();
-
-                //Bring back the fab
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -71,53 +101,6 @@ public class GroupsListFragment extends Fragment {
                 }, 1000);
             }
         });
-
-        Firebase myFirebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data");
-        Firebase groupsRef = myFirebaseRef.child("groups");
-        groupsRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                adapter.items.add(dataSnapshot.getValue(Group.class));
-                adapter.notifyItemInserted(adapter.items.size() - 1);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Group value = dataSnapshot.getValue(Group.class);
-                int indexOf = adapter.items.indexOf(value);
-                if (indexOf >= 0) {
-                    adapter.items.remove(indexOf);
-                    adapter.items.add(indexOf, value);
-                    adapter.notifyItemChanged(indexOf);
-                } else {
-                    adapter.items.add(value);
-                    adapter.notifyItemInserted(adapter.items.size() - 1);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Group value = dataSnapshot.getValue(Group.class);
-                int indexOf = adapter.items.indexOf(value);
-                if (indexOf >= 0) {
-                    adapter.items.remove(indexOf);
-                    adapter.notifyItemRemoved(indexOf);
-                }
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                //Nothing here
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                //Nothing here
-            }
-        });
-
-
     }
 
     private void itemClicked(int adapterPosition) {
