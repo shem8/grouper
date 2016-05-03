@@ -1,5 +1,7 @@
 package grouper.shemmagnezi.com.grouper;
 
+import android.content.Context;
+
 import grouper.shemmagnezi.com.grouper.pojo.Group;
 import grouper.shemmagnezi.com.grouper.pojo.Member;
 

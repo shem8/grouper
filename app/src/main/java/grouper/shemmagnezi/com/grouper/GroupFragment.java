@@ -60,7 +60,11 @@ public class GroupFragment extends Fragment {
         groupItemListener = new IGrouperDao.ItemListener<Group>() {
             @Override
             public void itemChanged(Group item) {
-                groupName.setText(item.toString());
+                if (item == null) {
+                    groupName.setText("null");
+                } else {
+                    groupName.setText(item.toString());
+                }
             }
         };
         dao.setGroupListener(groupId, groupItemListener);
@@ -99,7 +103,9 @@ public class GroupFragment extends Fragment {
         memberItemListener = new IGrouperDao.ItemListener<Member>() {
             @Override
             public void itemChanged(Member item) {
-                if (item.getGroup() > 0) {
+                if (item == null) {
+                    memberName.setText("null");
+                } else if (item.getGroup() > 0) {
                     memberName.setText(item.getName() + " Group: " + item.getGroup());
                 } else {
                     memberName.setText(item.getName());

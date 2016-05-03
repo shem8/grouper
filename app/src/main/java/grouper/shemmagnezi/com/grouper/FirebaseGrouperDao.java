@@ -1,5 +1,6 @@
 package grouper.shemmagnezi.com.grouper;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.firebase.client.ChildEventListener;
@@ -25,7 +26,7 @@ public class FirebaseGrouperDao implements IGrouperDao {
     private Map<ItemsListener, ChildEventListener> listListeners;
 
     private FirebaseGrouperDao() {
-        firebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data");
+        firebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data/groups");
         valueListeners = new HashMap<>();
         listListeners = new HashMap<>();
     }
@@ -37,9 +38,13 @@ public class FirebaseGrouperDao implements IGrouperDao {
         return instance;
     }
 
+    public static void init(Context context) {
+        Firebase.setAndroidContext(context);
+    }
+
     @Override
     public String addMemberToGroup(Group group, Member member) {
-        Firebase members = firebaseRef.child("groups/" + group.getId() + "/members");
+        Firebase members = firebaseRef.child(group.getId() + "/members");
         Firebase newMember = members.push();
         member.setId(newMember.getKey());
         newMember.setValue(member);
@@ -49,8 +54,7 @@ public class FirebaseGrouperDao implements IGrouperDao {
 
     @Override
     public String addGroup(Group group) {
-        Firebase groups = firebaseRef.child("groups");
-        Firebase newGroup = groups.push();
+        Firebase newGroup = firebaseRef.push();
         group.setId(newGroup.getKey());
         newGroup.setValue(group);
 
@@ -59,8 +63,6 @@ public class FirebaseGrouperDao implements IGrouperDao {
 
     @Override
     public void setGroupsListListener(final ItemsListener<Group> listener) {
-        Firebase myFirebaseRef = new Firebase("https://amber-fire-737.firebaseio.com/data");
-        Firebase groupsRef = myFirebaseRef.child("groups");
         ChildEventListener childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -85,7 +87,7 @@ public class FirebaseGrouperDao implements IGrouperDao {
             public void onCancelled(FirebaseError firebaseError) {
             }
         };
-        groupsRef.addChildEventListener(childEventListener);
+        firebaseRef.addChildEventListener(childEventListener);
 
         listListeners.put(listener, childEventListener);
     }

@@ -24,15 +24,14 @@ import grouper.shemmagnezi.com.grouper.pojo.Group;
  */
 public class GroupsListFragment extends Fragment {
 
-    private GroupNameAdapter adapter;
-    private TextView memberName;
-    private IGrouperDao dao;
-
     public interface GroupsListFragmentListener {
         void openAddGroup();
         void groupSelected(Group group, String name);
     }
 
+    private GroupNameAdapter adapter;
+    private TextView memberName;
+    private IGrouperDao dao = FirebaseGrouperDao.getInstance();
     private RecyclerView groupsList;
     private FloatingActionButton fab;
     private GroupsListFragmentListener listener;

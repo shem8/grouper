@@ -21,7 +21,9 @@ public class MainActivity extends AppCompatActivity implements AddGroupFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Firebase.setAndroidContext(this);
+        FirebaseGrouperDao.init(this);
+        dao = FirebaseGrouperDao.getInstance();
+
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
