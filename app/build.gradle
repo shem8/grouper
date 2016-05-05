@@ -1,14 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        prod {
-            keyAlias 'grouper'
-            keyPassword 'grouper'
-            storeFile file('key.jks')
-            storePassword 'grouper'
-        }
-    }
+
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     defaultConfig {
@@ -22,7 +15,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.prod
         }
     }
     packagingOptions {
